@@ -3,13 +3,13 @@ import dotenv from 'dotenv'
 import { cleanEnv, str } from 'envalid'
 
 import { setBotListener } from './bot'
-import { PingSlashCommand } from './commands/ping'
+import { PingSlashCommand,testSlashCommand } from './commands/ping'
 import { deploySlashCommands } from './deploy'
 import { SlashCommand } from './types/command'
 import { AppConfig } from './types/config'
 
 // Register commands
-const commandList: Array<SlashCommand> = [PingSlashCommand]
+const commandList: Array<SlashCommand> = [PingSlashCommand,testSlashCommand]
 
 // Read .env file (if exist)
 dotenv.config()
@@ -25,7 +25,7 @@ const env = cleanEnv(process.env, {
 const appConfig: AppConfig = {
   token: env.TOKEN,
   clientId: env.CLIENT_ID,
-  guildId: env.GUILD_ID
+  guildIds: env.GUILD_ID.split(',')
 }
 
 // DiscordJS API Client: https://discord.js.org/#/docs/discord.js/main/class/Client
