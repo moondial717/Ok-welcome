@@ -1,9 +1,9 @@
 import { Client, Collection, Events } from 'discord.js'
 
-import { SlashCommand,SlashCommand1 } from './types/command'
+import { SlashCommand } from './types/command'
 
-export function setBotListener(client: Client, commandList: Array<SlashCommand>|Array<SlashCommand1>) {
-  const commands = new Collection<string, SlashCommand1>(commandList.map((c) => [c.data.name, c]))
+export function setBotListener(client: Client, commandList: Array<SlashCommand>) {
+  const commands = new Collection<string, SlashCommand>(commandList.map((c) => [c.data.name, c]))
 
   client.once(Events.ClientReady, () => {
     console.log('Bot Ready!')
