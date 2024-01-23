@@ -23,7 +23,8 @@ def interview(prompt):
     prompt,
     **parameters,
     )
-    result = f"{response.text}\nTokens used: {response.grounding_metadata}"
+    #result = f"{response.text}\nTokens used: {response.grounding_metadata}"
+    result = f"{response.text}"
     return result
 prompt = "請使用繁體中文回答：\n"
 prompt += sys.argv[1]
