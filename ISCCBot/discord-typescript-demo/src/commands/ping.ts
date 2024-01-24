@@ -9,6 +9,22 @@ export const PingSlashCommand: SlashCommand = {
   }
 }
 
+export const urlSlashCommand: SlashCommand = {
+  data: new SlashCommandBuilder().setName('url').setDescription('Uploads URL of your file!')
+  .addStringOption(option =>
+    option.setName('prompt').setDescription('prompt').setRequired(true)
+  ),
+  async execute(interaction) {
+    let url = interaction.options.getString('prompt')!;
+    const idMatch = url.match(/\/d\/(.+?)\//);
+    if (idMatch && idMatch[1]) {
+      const fileId = idMatch[1];
+      url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    }
+    await interaction.reply(url);
+  }
+}
+
 const express = require('express')
 const app = express()
 let { PythonShell } = require('python-shell')
