@@ -38,11 +38,11 @@ export const testSlashCommand: SlashCommand = {
 function pythonProcess(prompt: string) {
   return new Promise<string>((resolve, reject) => {
     let options = {
-      pythonPath: 'D:/ISCCBot/env/Scripts/python.exe',
+      pythonPath: 'D:/hackason/Ok-welcome/ISCCBot/env/Scripts/python.exe',
       args: [prompt] // 將參數傳遞到 Python 腳本
     };
 
-    let shell = new PythonShell('D:/ISCCBot/test.py', options);
+    let shell = new PythonShell('D:/hackason/Ok-welcome/ISCCBot/test.py', options);
     let output = '';
 
     shell.on('message', function (message: string) {
