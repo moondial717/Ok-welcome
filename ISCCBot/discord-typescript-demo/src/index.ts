@@ -34,7 +34,7 @@ const appConfig: AppConfig = {
 
 // DiscordJS API Client: https://discord.js.org/#/docs/discord.js/main/class/Client
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessageReactions],
 	partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 })
 
