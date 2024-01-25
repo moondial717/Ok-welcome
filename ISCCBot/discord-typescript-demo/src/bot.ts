@@ -1,9 +1,10 @@
-import { Client, Collection, Events, PermissionsBitField } from 'discord.js'
+import { Client, Collection, Events, PermissionsBitField,
+  PartialMessageReaction, MessageReaction } from 'discord.j
 import { Storage } from '@google-cloud/storage';
 import fetch from 'node-fetch';
 import { SlashCommand,SlashSubCommand } from './types/command'
-
 import { Tags } from './commands/tag'
+import { uploadFileToGCS } from './commands/uploadfile'
 
 const storage = new Storage({ keyFilename: './third-nature-412206-ffe52cd8ea28.json' });
 const bucketName = 'third-nature-412206_cloudbuild';
@@ -52,26 +53,6 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
     console.log('Bot Ready!')
   })
 
-  client.on(Events.MessageCreate, async message => {
-    // 檢查消息是否包含附件
-    if (message.attachments.size > 0) {
-        message.attachments.forEach(attachment => {
-            // 檢查附件是否有 URL 和名稱
-            if (attachment.url && attachment.name) {
-                // 下載檔案並上傳到 Google Cloud Storage
-                uploadFileToGCS(attachment.url, attachment.name);
-            }
-        });
-    }
-    else {
-      const idMatch = message.content.match(/\/d\/(.+?)\//);
-      if (idMatch && idMatch[1]) {
-        const fileId = idMatch[1];
-        const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
-        uploadFileToGCS(url, fileId);
-      }
-    }
-  })
 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return
@@ -100,7 +81,7 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
         return;
       }
     }
-    if (reaction.message.author === null || reaction.message.guild === null || reaction.message.content === null) return; // Add this line to check if reaction.message.author is null
+    if (!reaction.message?.author || !reaction.message?.guild|| !reaction.message?.content) return;
     if (reaction.emoji.name === '☑️') {
       const member = await reaction.message.guild.members.fetch(user.id);
       if (member.permissions.has(PermissionsBitField.Flags.Administrator)) {
@@ -111,9 +92,36 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
         let channel = reaction.message.guild.channels.cache.find(channel => channel.name === '指令')!;
         if(channel.isTextBased()){
           channel.send(`<@${user.id}> 若想為此問題建立標籤，請輸入指令:`);
-          channel.send(`/tag add name: question:${question} answer:${remainingLines}`);
+          channel.send(`/tag add name: type: question:${question} answer:${remainingLines}`);
         }
       }
     }
+    if(reaction.emoji.name === '📌'){
+      detecturlfile(reaction);
+    }
+
   })
+}
+
+async function detecturlfile(reaction: MessageReaction | PartialMessageReaction) {
+  if (reaction.message.attachments.size > 0) {
+    reaction.message.attachments.forEach(attachment => {
+        // 檢查附件是否有 URL 和名稱
+        if (attachment.url && attachment.name) {
+            // 下載檔案並上傳到 Google Cloud Storage
+            uploadFileToGCS(attachment.url, attachment.name);
+        }
+    });
+  }
+  else {
+    const idMatch = reaction.message.content?.match(/\/d\/(.+?)\//);
+    reaction.message.embeds.forEach(embed => {
+      const fileName = embed.title;
+      if (idMatch && idMatch[1] && fileName) {
+        const fileId = idMatch[1];
+        const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        uploadFileToGCS(url, fileName);
+      }
+    })
+  }
 }

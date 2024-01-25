@@ -11,9 +11,19 @@ const sequelize = new Sequelize('database', 'user', 'password', {
 });
 
 export const Tags = sequelize.define('tags', {
+    guildId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     name: {
         type: DataTypes.STRING,
-        unique: true,
+        unique: 'tagIndex',
+    },
+    type: DataTypes.STRING,
+    private: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
     },
     question: DataTypes.TEXT,
     answer: DataTypes.TEXT,
@@ -23,6 +33,14 @@ export const Tags = sequelize.define('tags', {
         defaultValue: 0,
         allowNull: false,
     },
+}, {
+    indexes: [
+        {
+            unique: true,
+            fields: ['guildId', 'name'],
+            name: 'tagIndex'
+        }
+    ]
 });
 
 export const TagSlashCommand: SlashSubCommand= {
@@ -44,12 +62,18 @@ export const TagSlashCommand: SlashSubCommand= {
         let question: string;
         let answer: string;
         let editname: string;
+        let private_: boolean = false;
+        let type: string;
         switch (interaction.options.getSubcommand()) {
             case 'add': case 'a':
                 name = interaction.options.getString('name')!;
                 question = interaction.options.getString('question')!;
                 answer = interaction.options.getString('answer')!;
-                await addTag(interaction, name, question, answer);
+                type = interaction.options.getString('type')!;
+                if(interaction.options.getBoolean('private') != null){
+                    private_ = interaction.options.getBoolean('private')!;
+                }
+                await addTag(interaction, name, type, question, answer, private_);
                 break;
             case 'fetch': case 'f':
                 name = interaction.options.getString('name')!;
@@ -81,23 +105,26 @@ export const TagSlashCommand: SlashSubCommand= {
 }
 
 const addTag =
-    async (interaction: ChatInputCommandInteraction, name: string, question: string, answer: string) =>
+    async (interaction: ChatInputCommandInteraction, name: string, type: string, question: string, answer: string, private_: boolean) =>
     {
         try {
             // equivalent to: INSERT INTO tags (name, description, username) values (?, ?, ?);
             const tag = await Tags.create({
                 name: name,
+                type: type,
                 question: question,
                 answer: answer,
                 username: interaction.user.username,
+                private: private_,
+                guildId: interaction.guildId
             });
-            await interaction.reply(`Tag ${tag.get('name')} added.`);
+            await interaction.reply({content:`Tag ${tag.get('name')} added.`, ephemeral: true });
         }
         catch (e:any) {
             if (e.name === 'SequelizeUniqueConstraintError') {
-                await interaction.reply('That tag already exists.');
+                await interaction.reply({content:'That tag already exists.', ephemeral: true });
             }else{
-                await interaction.reply('Something went wrong with adding a tag.');
+                await interaction.reply({content: 'Something went wrong with adding a tag.', ephemeral: true});
             }
         }
     }
@@ -106,14 +133,20 @@ const fetchTag =
     async (interaction: ChatInputCommandInteraction, name: string) =>
     {
         // equivalent to: SELECT * FROM tags WHERE name = 'tagName' LIMIT 1;
-        const tag: any = await Tags.findOne({ where: { name: name } });
+        const tag: any = await Tags.findOne({ where: { name: name, guildId: interaction.guildId } });
+
+        if(tag.get('private') && tag.get('username') != interaction.user.username){
+            await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
+            return;
+        }
+
         if (tag) {
             // equivalent to: UPDATE tags SET usage_count = usage_count + 1 WHERE name = 'tagName';
             tag.increment('usage_count');
-            await interaction.reply(`問題: ${tag.get('question').toString()}\n回答: ${tag.get('answer').toString()}`);
+            await interaction.reply({content: `問題: ${tag.get('question').toString()}\n回答: \n${tag.get('answer').toString()}`, ephemeral: true });
         }
         else {
-            await interaction.reply(`Could not find tag: ${name}`);
+            await interaction.reply({content:`Could not find tag: ${name}`, ephemeral: true});
         }
     }
 
@@ -121,61 +154,114 @@ const showTags =
     async (interaction: ChatInputCommandInteraction) =>
     {
         // equivalent to: SELECT name FROM tags;
-        const tagList = await Tags.findAll({ attributes: ['name','usage_count'] ,order: [['usage_count','DESC']] });
-        const table = new Table({
-            titles : ['使用次數','標籤'],
-            titleIndexes : [0,10],
-            columnIndexes : [0,12],
-            start: '`',
-            end: '`',
-            padEnd: 10
-        });
+        //If username is null, show all tags, else show tags of the user
+        let tagList: any;
+        let num: number;
+        let username: string;
+        let title: string;
+        let type: string;
+
+
+        if(interaction.options.getString('username') == null){
+            title = '標籤列表';
+            if(interaction.options.getString('type') != null){
+                type = interaction.options.getString('type')!;
+                tagList = await Tags.findAll({ attributes: ['name','usage_count','username'] ,order: [['usage_count','DESC']] ,where: { guildId: interaction.guildId ,type: type} });
+            }else{
+                tagList = await Tags.findAll({ attributes: ['name','usage_count','username'] ,order: [['usage_count','DESC']] ,where: { guildId: interaction.guildId }});
+            }
+        }else{
+            username = interaction.options.getString('username')!;
+
+            //If input is s, show tags of the user
+            if(username == 's'){
+                username = interaction.user.username;
+            }
+
+            title = `${username}的標籤列表`;
+
+            if(interaction.options.getString('type') != null){
+                type = interaction.options.getString('type')!;
+                tagList = await Tags.findAll({ attributes: ['name','usage_count','username'] ,order: [['usage_count','DESC']], where: { guildId: interaction.guildId, username: username ,type: type} });
+            }else{
+                tagList = await Tags.findAll({ attributes: ['name','usage_count','username'] ,order: [['usage_count','DESC']], where: { guildId: interaction.guildId, username: username } });
+            }
+        }
+
+
+        if(tagList.length == 0){
+            await interaction.reply(':x: 無標籤或該使用者沒有建立標籤!');
+            return;
+        }
+
         const tagname = tagList.map((t: any) => t.name);
         const tagusage = tagList.map((t: any) => t.usage_count);
+        const user = tagList.map((t: any) => t.username);
         const number = interaction.options.getString('number')!;
-        let num: number;
+
+        const table = new Table({
+            titles : ['使用次數','建立者','標籤'],
+            titleIndexes : [0,10,68],
+            columnIndexes : [0,11,44],
+            start: '`',
+            end: '`',
+            padEnd: 30
+        });
+
+
+        //If number is null, show all tags
         if(number != null){
             num = parseInt(number);
             if(num > tagList.length){
                 for(let i = 0; i < tagList.length; i++){
-                    table.addRow([tagusage[i].toString(),tagname[i]]);
+                    table.addRow([tagusage[i].toString(),tagname[i],user[i]]);
                 }
             }
             for(let i = 0; i < num; i++){
-                table.addRow([tagusage[i].toString(),tagname[i]]);
+                table.addRow([tagusage[i].toString(),user[i],tagname[i]]);
             }
         }else{
             num = tagList.length;
             for(let i = 0; i < tagList.length; i++){
-                table.addRow([tagusage[i].toString(),tagname[i]]);
+                table.addRow([tagusage[i].toString(),user[i],tagname[i]]);
             }
         }
+
         const embed = new EmbedBuilder()
         .setFields(table.toField(),{name:`顯示前${num}筆標籤`,value:'\u200B'})
-        .setTitle('標籤列表')
+        .setTitle(title)
         .setColor('#9cd6b7')
         .setTimestamp();
-        //const tagString = tagList.map((t: any) => `${t.name} : ${t.usage_count}`).join('\n') || 'No tags set.';
-        await interaction.reply({embeds: [embed] });
+        await interaction.reply({embeds: [embed] , ephemeral: true});
     }
 
 const removeTag =
     async (interaction: ChatInputCommandInteraction, name: string) =>
     {
-        // equivalent to: DELETE from tags WHERE name = ?;
-        const rowCount = await Tags.destroy({ where: { name: name } });
-        if (!rowCount) await interaction.reply('That tag did not exist.');
+        if(!checkPrivate(interaction, name)){
+            await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
+            return;
+        }
 
-        await interaction.reply('Tag deleted.');
+        // equivalent to: DELETE from tags WHERE name = ?;
+        const rowCount = await Tags.destroy({ where: { guildId: interaction.guildId ,name: name } });
+        if (!rowCount) await interaction.reply({content: 'That tag did not exist.', ephemeral: true});
+
+        await interaction.reply({content: 'Tag deleted.', ephemeral: true});
     }
 
 const editTag =
     async (interaction: ChatInputCommandInteraction, name: string, question: string, answer: string, editname: string) =>
     {
+        if(!checkPrivate(interaction, name)){
+            await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
+            return;
+        }
+
         let affectedRows: any;
         // equivalent to: UPDATE tags SET description = ? WHERE name = ?;
         if(question == null && answer == null && editname == null){
-            await interaction.reply('You need to provide question or answer to edit.');
+            await interaction.reply({content: 'You need to provide question or answer to edit.', ephemeral: true});
             return;
         }
 
@@ -192,21 +278,26 @@ const editTag =
             }
         }
 
-        affectedRows = await Tags.update(updateData, { where: { name: name } });
+        affectedRows = await Tags.update(updateData, { where: { guildId: interaction.guildId ,name: name } });
 
         if (affectedRows[0] > 0) {
-            await interaction.reply(`Tag ${name} was edited.`);
+            await interaction.reply({content:`Tag ${name} was edited.`, ephemeral: true});
         }
         else {
-            await interaction.reply(`Could not find a tag with name ${name}.`);
+            await interaction.reply({content:`Could not find a tag with name ${name}.`, ephemeral: true});
         }
     }
 
 const infoTag =
     async (interaction: ChatInputCommandInteraction, name: string) =>
     {
+        if(!checkPrivate(interaction, name)){
+            await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
+            return;
+        }
+
         // equivalent to: SELECT * FROM tags WHERE name = 'tagName' LIMIT 1;
-        const tag: any = await Tags.findOne({ where: { name: name } });
+        const tag: any = await Tags.findOne({ where: { guildId: interaction.guildId ,name: name } });
         if (tag) {
             const embed = new EmbedBuilder()
             .setColor('#0099ff')
@@ -226,12 +317,20 @@ const infoTag =
                 { name: '最後更新時間', value: tag.get('updatedAt').toString() },
             ).setTitle('標籤資訊');
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] , ephemeral: true});
         }
         else {
-            await interaction.reply(`Could not find tag: ${name}`);
+            await interaction.reply({content: `Could not find tag: ${name}`, ephemeral: true});
         }
     }
+
+function checkPrivate(interaction: ChatInputCommandInteraction, name: string){
+    const private_: any = Tags.findOne({attributes:['private','username'], where: { guildId: interaction.guildId ,name: name } });
+    if(private_.get('private') && private_.get('username') != interaction.user.username){
+        return false;
+    }
+    return true;
+}
 
 function createAddSubcommand() {
     return new SlashCommandSubcommandBuilder()
@@ -240,10 +339,16 @@ function createAddSubcommand() {
             option.setName('name').setDescription('The name of the tag').setRequired(true)
         )
         .addStringOption(option =>
+            option.setName('type').setDescription('The type of the question(sop,maunal,spec or NA)').setRequired(true)
+        )
+        .addStringOption(option =>
             option.setName('question').setDescription('The question of the tag').setRequired(true)
         )
         .addStringOption(option =>
             option.setName('answer').setDescription('The answer of the question').setRequired(true)
+        )
+        .addBooleanOption(option =>
+            option.setName('private').setDescription('The tag is private or not(default:0)').setRequired(false)
         );
 }
 
@@ -260,6 +365,12 @@ function createShowSubcommand() {
         .setDescription('顯示問題列表')
         .addStringOption(option =>
             option.setName('number').setDescription('欲顯示幾筆').setRequired(false)
+        )
+        .addStringOption(option =>
+            option.setName('username').setDescription('The user you want to check, type s for yourself').setRequired(false)
+        )
+        .addStringOption(option =>
+            option.setName('type').setDescription('The type of question').setRequired(false)
         );
 }
 
@@ -293,95 +404,5 @@ function createInfoSubcommand() {
         .setDescription('取得問題標籤資訊')
         .addStringOption(option =>
             option.setName('name').setDescription('The name of the tag').setRequired(true)
-        );
-}
-
-/*
-export const tagSlashCommand: SlashSubCommand = {
-    data: new SlashCommandBuilder().setName('tag').setDescription('取得已回復問題和回答')
-    .addSubcommand(subcommand =>
-        subcommand.setName('fetch').setDescription('取得問題')
-        .addStringOption(option =>
-            option.setName('name').setDescription('The name of the tag').setRequired(true)
         )
-    ),
-    async execute(interaction) {
-        const tagName = interaction.options.getString('name')!;
-        // equivalent to: SELECT * FROM tags WHERE name = 'tagName' LIMIT 1;
-        const tag: any = await Tags.findOne({ where: { name: tagName } });
-        if (tag) {
-            // equivalent to: UPDATE tags SET usage_count = usage_count + 1 WHERE name = 'tagName';
-            tag.increment('usage_count');
-
-            await interaction.reply(tag.get('description').toString());
-        }
-        else {
-            await interaction.reply(`Could not find tag: ${tagName}`);
-        }
-    }
 }
-
-export const removeTagSlashCommand: SlashCommand = {
-    data: new SlashCommandBuilder().setName('removetag').setDescription('Remove a tag')
-    .addStringOption(option =>
-        option.setName('name').setDescription('The name of the tag').setRequired(true)
-    ),
-    async execute(interaction) {
-        const tagName = interaction.options.getString('name')!;
-        // equivalent to: DELETE from tags WHERE name = ?;
-        const rowCount = await Tags.destroy({ where: { name: tagName } });
-        if (!rowCount) await interaction.reply('That tag did not exist.');
-
-        await interaction.reply('Tag deleted.');
-    }
-}
-
-export const showTagsSlashCommand: SlashCommand = {
-    data: new SlashCommandBuilder().setName('showtags').setDescription('Show all tags'),
-    async execute(interaction) {
-        // equivalent to: SELECT name FROM tags;
-        const tagList = await Tags.findAll({ attributes: ['name'] ,order: ['usage_count','DESC'] });
-        const tagString = tagList.map((t: any) => t.name).join(', ') || 'No tags set.';
-        await interaction.reply(`List of tags: ${tagString}`);
-    }
-}
-
-export const editTagSlashCommand: SlashCommand = {
-    data: new SlashCommandBuilder().setName('edittag').setDescription('Edit a tag')
-    .addStringOption(option =>
-        option.setName('name').setDescription('The name of the tag').setRequired(true)
-    )
-    .addStringOption(option =>
-        option.setName('description').setDescription('你想更改的描述').setRequired(true)
-    ),
-    async execute(interaction) {
-        const tagName = interaction.options.getString('name')!;
-        const tagDescription = interaction.options.getString('description')!;
-        // equivalent to: UPDATE tags SET description = ? WHERE name = ?;
-        const affectedRows = await Tags.update({ description: tagDescription }, { where: { name: tagName } });
-        if (affectedRows[0] > 0) {
-            await interaction.reply(`Tag ${tagName} was edited.`);
-        }
-        else {
-            await interaction.reply(`Could not find a tag with name ${tagName}.`);
-        }
-    }
-}
-
-export const infoTagSlashCommand: SlashCommand = {
-    data: new SlashCommandBuilder().setName('taginfo').setDescription('get tag info')
-    .addStringOption(option =>
-        option.setName('name').setDescription('The name of the tag').setRequired(true)
-    ),
-    async execute(interaction) {
-        const tagName = interaction.options.getString('name')!;
-        // equivalent to: SELECT * FROM tags WHERE name = 'tagName' LIMIT 1;
-        const tag: any = await Tags.findOne({ where: { name: tagName } });
-        if (tag) {
-            await interaction.reply(`Tag name: ${tag.get('name')}\nTag description: ${tag.get('description')}\nTag usage: ${tag.get('usage_count')}`);
-        }
-        else {
-            await interaction.reply(`Could not find tag: ${tagName}`);
-        }
-    }
-}*/

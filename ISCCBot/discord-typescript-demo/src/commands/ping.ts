@@ -38,6 +38,7 @@ export const testSlashCommand: SlashCommand = {
 function pythonProcess(prompt: string) {
   return new Promise<string>((resolve, reject) => {
     let options = {
+
       pythonPath: 'D:/NYCU/contest/TSMC_CareerHack/Ok-welcome2/ISCCBot/env/Scripts/python.exe',
       args: [prompt] // 將參數傳遞到 Python 腳本
     };
