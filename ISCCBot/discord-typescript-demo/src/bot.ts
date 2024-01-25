@@ -41,10 +41,16 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
       }
     }
 
+    if(reaction.emoji.name === ':x:'){
+      reaction.message.delete();
+    }
+
     if (!reaction.message?.author || !reaction.message?.guild) return;
+
     if(reaction.emoji.name === '📌'){
       detecturlfile(reaction);
     }
+    
 
     if (!reaction.message?.content) return;
     if (reaction.emoji.name === '☑️') {
@@ -61,8 +67,6 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
         }
       }
     }
-
-
   })
 }
 

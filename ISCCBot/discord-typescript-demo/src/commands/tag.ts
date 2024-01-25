@@ -324,9 +324,9 @@ const infoTag =
         }
     }
 
-function checkPrivate(interaction: ChatInputCommandInteraction, name: string){
-    const private_: any = Tags.findOne({attributes:['private','username'], where: { guildId: interaction.guildId ,name: name } });
-    if(private_.get('private') && private_.get('username') != interaction.user.username){
+async function checkPrivate(interaction: ChatInputCommandInteraction, name: string){
+    const private_: any = await Tags.findOne({attributes:['private','username'], where: { guildId: interaction.guildId ,name: name } });
+    if(private_ && private_.get('private') && private_.get('username') != interaction.user.username){
         return false;
     }
     return true;

@@ -31,7 +31,10 @@ export const testSlashCommand: SlashCommand = {
       let result = await pythonProcess(prompt);
 
       // 最後更新先前的 "deferred" 訊息
-      await interaction.editReply(result);
+      const message = await interaction.editReply(result);
+      message.react('☑️');
+      message.react('📌');
+      message.react(':x:');
   }
 };
 
