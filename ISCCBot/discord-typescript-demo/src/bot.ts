@@ -8,23 +8,40 @@ import { Tags } from './commands/tag'
 const storage = new Storage({ keyFilename: './third-nature-412206-ffe52cd8ea28.json' });
 const bucketName = 'third-nature-412206_cloudbuild';
 
-async function uploadFileToGCS(url: string, filename: string) {
+async function uploadFileToGCS(url: string, originalFilename: string) {
   const bucket = storage.bucket(bucketName);
-  const file = bucket.file(filename);
+  let filename = originalFilename;
+  let fileExists = await checkFileExists(bucket, filename);
 
+  // 如果文件已存在，增加唯一標識符
+  let count = 1;
+  while (fileExists) {
+    const extensionIndex = originalFilename.lastIndexOf('.');
+    const nameWithoutExtension = extensionIndex > 0 ? originalFilename.substring(0, extensionIndex) : originalFilename;
+    const extension = extensionIndex > 0 ? originalFilename.substring(extensionIndex) : '';
+    filename = `${nameWithoutExtension}_${count}${extension}`;
+    fileExists = await checkFileExists(bucket, filename);
+    count++;
+  }
+
+  const file = bucket.file(filename);
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
 
-  // 檢查 response.body 是否為 null
   if (response.body) {
-      const stream = file.createWriteStream();
-      stream.on('error', e => console.error(`Failed to upload ${filename}:`, e));
-      stream.on('finish', () => console.log(`Successfully uploaded ${filename}`));
-
-      response.body.pipe(stream);
+    const stream = file.createWriteStream();
+    stream.on('error', e => console.error(`Failed to upload ${filename}:`, e));
+    stream.on('finish', () => console.log(`Successfully uploaded ${filename}`));
+    
+    response.body.pipe(stream);
   } else {
-      throw new Error(`Response body is null for URL: ${url}`);
+    throw new Error(`Response body is null for URL: ${url}`);
   }
+}
+
+async function checkFileExists(bucket: any, filename: string): Promise<boolean> {
+  const [exists] = await bucket.file(filename).exists();
+  return exists;
 }
 
 export function setBotListener(client: Client, commandList: Array<SlashCommand|SlashSubCommand>) {
@@ -45,6 +62,14 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
                 uploadFileToGCS(attachment.url, attachment.name);
             }
         });
+    }
+    else {
+      const idMatch = message.content.match(/\/d\/(.+?)\//);
+      if (idMatch && idMatch[1]) {
+        const fileId = idMatch[1];
+        const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        uploadFileToGCS(url, fileId);
+      }
     }
   })
 

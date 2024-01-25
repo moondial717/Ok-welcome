@@ -3,14 +3,14 @@ import dotenv from 'dotenv'
 import { cleanEnv, str } from 'envalid'
 
 import { setBotListener } from './bot'
-import { PingSlashCommand,testSlashCommand, urlSlashCommand } from './commands/ping'
+import { PingSlashCommand,testSlashCommand } from './commands/ping'
 import { TagSlashCommand} from './commands/tag'
 import { deploySlashCommands } from './deploy'
 import { SlashCommand,SlashSubCommand } from './types/command'
 import { AppConfig } from './types/config'
 
 // Register commands
-const commandList: Array<SlashCommand> = [PingSlashCommand,testSlashCommand, urlSlashCommand]
+const commandList: Array<SlashCommand> = [PingSlashCommand,testSlashCommand]
 const subcommandList: Array<SlashSubCommand> = [TagSlashCommand]
 
 // Combine commandList and subcommandList
