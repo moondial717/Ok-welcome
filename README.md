@@ -42,18 +42,18 @@
 
 ### `tag` + `subcommand` - **Tag 標籤紀錄**
 #### 新增問題標籤：`\tag add`或`\tag a`
-*  ![截圖 2024-01-26 下午9.10.31](https://hackmd.io/_uploads/Hy73g4b9a.png)
+![截圖 2024-01-26 下午9.10.31](https://hackmd.io/_uploads/Hy73g4b9a.png)
 ![截圖 2024-01-26 下午9.11.40](https://hackmd.io/_uploads/r1WTl4Z9T.png)
 * 可快速新增
     * 在bot的回應處，選擇☑️表情符號
-    * ![截圖 2024-01-26 下午9.27.14](https://hackmd.io/_uploads/Bkz57N-ca.png)
+      ![截圖 2024-01-26 下午9.27.14](https://hackmd.io/_uploads/Bkz57N-ca.png)
     * 此時bot會在`指令`頻道回覆
     * 右鍵複製bot的訊息並貼上，自訂`name`（例如process）和`type`(例如：SOP)即可
-    * ![截圖 2024-01-26 下午9.32.34](https://hackmd.io/_uploads/H1iJSVWc6.png)
+      ![截圖 2024-01-26 下午9.32.34](https://hackmd.io/_uploads/H1iJSVWc6.png)
 * private tag 私人標籤 
     * 將`private`設為`True`可設定private tag
     * Default Setting: False（public）
-    * ![截圖 2024-01-26 下午10.18.33](https://hackmd.io/_uploads/SJOwkBb56.png)
+      ![截圖 2024-01-26 下午10.18.33](https://hackmd.io/_uploads/SJOwkBb56.png)
 
 
 #### 顯示問題列表：`\tag show`或`\tag s`
