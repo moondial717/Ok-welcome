@@ -51,11 +51,11 @@ export const helpSlashCommand: SlashSubCommand = {
                     /tag add 等同於 /tag a`
                 );
                 embed.addFields(
-                    {name: 'name', value: '欲設定的標籤名稱 : 必要', inline: true},
-                    {name: 'question', value: '欲設定的問題 : 必要', inline: true},
-                    {name: 'answer', value: '欲設定的答案 : 必要', inline: true},
-                    {name: 'type', value: '問題的類型 : 必要', inline: true},
-                    {name: 'private', value:`標籤是否為私人 : 非必要, 預設為公開\n若為私人則其他使用者無法使用對此標籤使用以下指令\n- /tag fetch\n- /tag info\n- /tag edit\n- /tag remove`}
+                    {name: 'name(必填)', value: '欲設定標籤名稱', inline: true},
+                    {name: 'question(必填)', value: '欲設定問題', inline: true},
+                    {name: 'answer(必填)', value: '欲設定答案', inline: true},
+                    {name: 'type(必填)', value: '問題類型', inline: true},
+                    {name: 'private(非必填)', value:`標籤是否為私人, 預設為公開\n若為私人則其他使用者無法使用對此標籤使用以下指令\n- /tag fetch\n- /tag info\n- /tag edit\n- /tag remove`}
                 )
             }
             else if(subcommand === 'remove'){
@@ -66,21 +66,22 @@ export const helpSlashCommand: SlashSubCommand = {
                     /tag remove 等同於 /tag r `
                 );
                 embed.addFields(
-                    {name: 'name', value: '欲移除的標籤名稱 : 必要', inline: true},
+                    {name: 'name(必填)', value: '欲移除標籤名稱', inline: true},
                 )
             }
             else if(subcommand === 'show'){
                 embed.setTitle('Help - Tag - Show');
                 embed.setDescription(
                     `功能: 顯示標籤列表
-                    若未設定options則顯示所有標籤, 若設定options則顯示符合options的標籤, 依照使用次數排序
+                    若未設定options，將顯示所有標籤；
+                    若設定options，則顯示符合options的標籤、依照使用次數排序
                     /tag show <username> <type> <number>
                     /tag show 等同於 /tag s `
                 );
                 embed.addFields(
-                    {name: 'username', value: '欲篩選的使用者名稱 : 非必要', inline: true},
-                    {name: 'type', value: '欲篩選的問題類型 : 非必要', inline: true},
-                    {name: 'number', value: '僅顯示前N筆標籤 : 非必要', inline: true}
+                    {name: 'username(非必填)', value: '欲篩選使用者名稱', inline: true},
+                    {name: 'type(非必填)', value: '欲篩選問題類型', inline: true},
+                    {name: 'number(非必填)', value: '僅顯示前N筆標籤', inline: true}
                 )
             }
             else if(subcommand === 'info'){
@@ -91,7 +92,7 @@ export const helpSlashCommand: SlashSubCommand = {
                     /tag info 等同於 /tag i `
                 );
                 embed.addFields(
-                    {name: 'name', value: '欲顯示的標籤名稱 : 必要', inline: true}
+                    {name: 'name(必填)', value: '欲顯示標籤名稱', inline: true}
                 )
             }
             else if(subcommand === 'fetch'){
@@ -102,7 +103,7 @@ export const helpSlashCommand: SlashSubCommand = {
                     /tag fetch 等同於 /tag f `
                 );
                 embed.addFields(
-                    {name: 'name', value: '欲顯示的標籤名稱 : 必要', inline: true}
+                    {name: 'name(必填)', value: '欲顯示標籤名稱', inline: true}
                 )
             }
             else if(subcommand === 'edit'){
@@ -113,37 +114,53 @@ export const helpSlashCommand: SlashSubCommand = {
                     /tag edit 等同於 /tag e `
                 );
                 embed.addFields(
-                    {name: 'name', value: '欲編輯的標籤名稱 : 必要', inline: true},
-                    {name: 'question', value: '欲設定的問題 : 非必要', inline: true},
-                    {name: 'answer', value: '欲設定的答案 : 非必要', inline: true},
-                    {name: 'editname', value: '欲設定的標籤名稱 : 非必要', inline: true}
+                    {name: 'name(必填)', value: '欲編輯標籤名稱', inline: true},
+                    {name: 'question(非必填)', value: '欲設定問題', inline: true},
+                    {name: 'answer(非必填)', value: '欲設定答案', inline: true},
+                    {name: 'editname(非必填)', value: '欲設定標籤名稱', inline: true}
                 )
             }
             else if(subcommand === 'all'){
                 embed.setTitle('Help - Tag - All');
                 embed.setDescription(
-                    `顯示所有標籤相關的指令
-                    /tag add : 新增一個標籤
-                    /tag fetch : 顯示標籤的問題和回覆
-                    /tag info : 顯示標籤的詳細資訊
-                    /tag remove : 移除一個標籤
-                    /tag show : 顯示標籤列表
-                    /tag edit : 編輯一個標籤`
+                    `顯示所有標籤相關的指令`
+                );
+                embed.addFields(
+                    {name: `/tag add`, value: `新增一個標籤`},
+                    {name: `/tag fetch`, value: `顯示標籤的問題和回覆`},
+                    {name: `/tag info`, value: `顯示標籤的詳細資訊`},
+                    {name: `/tag remove`, value: `移除一個標籤`},
+                    {name: `/tag show`, value: `顯示標籤列表`},
+                    {name: `/tag edit`, value: `編輯一個標籤`},
                 );
             }
         }
         else if(subcommand === 'info'){
             embed.setTitle('Help - Info');
             embed.setDescription('你可以在網站上查看更多資訊:\nhttps://hackmd.io/aTB4xv92TiqJE58ca1xjpw');
-
         }
         else if(subcommand === 'ask'){
             embed.setTitle('Help - Ask');
-            embed.setDescription('To ask a question, use the command `/ask <question>`.');
+            embed.setDescription(
+                `/ask <prompt>`
+            );
+            embed.addFields(
+                {name: 'prompt', value: '想詢問的問題 : 必要'},
+                {name: 'icon - ☑️', value: '快速建立標籤\n於"指令"頻道複製+貼上bot文字即可完成tag'},
+                {name: 'icon - 🔧', value: '再問一次\nbot給出另一個結果'},
+                {name: 'icon - ❌', value: '刪除訊息\n該提問從對話框刪除且不列入歷史紀錄'},
+            )
         }
         else if(subcommand === 'all'){
             embed.setTitle('Help - All');
-            embed.setDescription('To retrieve users questions, use the command `/all`.');
+            embed.setDescription(
+                `/all <option> 選擇對象`
+            ); 
+            embed.addFields(
+                {name: 'user', value: '可選擇印出其中一個user的歷史紀錄'},
+                {name: 'my-questions - TRUE', value: '印出自己的歷史紀錄'},
+                {name: 'my-questions - FALSE', value: '印出所有user的歷史紀錄'},
+            )
         }
         interaction.reply({embeds: [embed]});
     }
