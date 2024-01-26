@@ -33,9 +33,11 @@ export const testSlashCommand: SlashCommand = {
 
       // 最後更新先前的 "deferred" 訊息
       const message = await interaction.editReply(result);
-      message.react('☑️');
-      message.react('📌');
-      message.react('❌');
+      await Promise.all([
+        message.react('☑️'),
+        message.react('📌'),
+        message.react('❌')
+      ]);
     
       // 檢查提問問題是否已存在
       const existingQuestion = await Questions.findOne({

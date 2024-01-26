@@ -39,7 +39,9 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
       }
     }
 
-    if(reaction.emoji.name === ':x:'){
+    if (user.bot) return;
+    
+    if(reaction.emoji.name === '❌'){
       reaction.message.delete();
     }
 
@@ -53,10 +55,12 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
 
     if (!reaction.message?.content) return;
     if (reaction.emoji.name === '☑️') {
-      
       if (member.permissions.has(PermissionsBitField.Flags.Administrator)) {
         let lines = reaction.message.content.split('\n');
         let firstLine = lines[0];
+
+        if (!firstLine.startsWith('你的問題是:')) return;
+
         let question = firstLine.slice(7, firstLine.length);
         let remainingLines = lines.slice(1).join('\n');
         let channel = reaction.message.guild.channels.cache.find(channel => channel.name === '指令')!;
