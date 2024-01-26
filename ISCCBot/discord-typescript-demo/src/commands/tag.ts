@@ -43,6 +43,21 @@ export const Tags = sequelize.define('tags', {
     ]
 });
 
+export const Questions = sequelize.define('allquestions', {
+    username: DataTypes.STRING,
+    question: DataTypes.TEXT,
+    name: DataTypes.STRING,
+  });
+  (async () => {
+    try {
+      // Sync the model to the database to ensure the "allquestions" table is created
+      await sequelize.sync();
+      console.log('Database synced successfully.');
+    } catch (error) {
+      console.error('Error syncing database:', error);
+    }
+  })();
+
 export const TagSlashCommand: SlashSubCommand= {
     data: new SlashCommandBuilder().setName('tag').setDescription('使用問題標籤')
     .addSubcommand(createAddSubcommand().setName('add'))
@@ -118,6 +133,7 @@ const addTag =
                 private: private_,
                 guildId: interaction.guildId
             });
+            await Questions.update({ name: name }, { where: { question: question } });
             await interaction.reply({content:`Tag ${tag.get('name')} added.`, ephemeral: true });
         }
         catch (e:any) {
