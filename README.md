@@ -16,8 +16,10 @@
     ![image](https://hackmd.io/_uploads/SkZWRHb9a.png)
     * ❌：刪除訊息
         * 從對話框刪除
+          
          ![ezgif-7-6c63a9b665](https://hackmd.io/_uploads/B1W8e8Z9a.gif)
         * 歷史紀錄同步刪除
+          
          ![image](https://hackmd.io/_uploads/BywcuI-ca.png)
 
 
