@@ -1,6 +1,7 @@
 import { CommandInteraction,SlashCommandBuilder } from 'discord.js'
 
 import { SlashCommand } from '../types/command'
+import { Questions } from './tag';
 
 export const PingSlashCommand: SlashCommand = {
   data: new SlashCommandBuilder().setName('ping').setDescription('Replies with Pong!'),
@@ -35,6 +36,12 @@ export const testSlashCommand: SlashCommand = {
       message.react('☑️');
       message.react('📌');
       message.react(':x:');
+      
+      await Questions.create({
+        username: interaction.user.username,
+        question: prompt,
+        name: null,
+      });
   }
 };
 
