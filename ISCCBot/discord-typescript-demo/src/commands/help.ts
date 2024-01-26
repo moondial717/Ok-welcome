@@ -24,6 +24,9 @@ export const helpSlashCommand: SlashSubCommand = {
         .addSubcommand(subcommand =>
             subcommand.setName('all').setDescription('Show the list of tag subcommands.')
         )
+        .addSubcommand(subcommand =>
+            subcommand.setName('edit').setDescription('How to edit a tag.')
+        )
     )
     .addSubcommand(subcommand =>
         subcommand.setName('ask').setDescription('How to ask a question.')
@@ -35,12 +38,13 @@ export const helpSlashCommand: SlashSubCommand = {
         const subcommand = interaction.options.getSubcommand();
         const subcommandGroup = interaction.options.getSubcommandGroup(false);
         const embed = new EmbedBuilder()
-        .setColor('#9cd6b7')
+        .setColor('#fca7be')
         if(subcommandGroup === 'tag'){
             if(subcommand === 'add'){
                 embed.setTitle('Help - Tag - Add');
                 embed.setDescription(
-                    `/tag add <name> <question> <answer> <type> <private>
+                    `功能: 新增一個標籤
+                    /tag add <name> <question> <answer> <type> <private>
                     /tag add 等同於 /tag a`
                 );
                 embed.addFields(
@@ -53,23 +57,76 @@ export const helpSlashCommand: SlashSubCommand = {
             }
             else if(subcommand === 'remove'){
                 embed.setTitle('Help - Tag - Remove');
-                embed.setDescription('To remove a tag, use the command `/tag remove <tag name>`.');
+                embed.setDescription(
+                    `功能: 移除一個標籤, 若標籤為私人則僅能由標籤建立者移除
+                    /tag remove <name>
+                    /tag remove 等同於 /tag r `
+                );
+                embed.addFields(
+                    {name: 'name', value: '欲移除的標籤名稱 : 必要', inline: true},
+                )
             }
             else if(subcommand === 'show'){
                 embed.setTitle('Help - Tag - Show');
-                embed.setDescription('To show the list of tags, use the command `/tag show`.');
+                embed.setDescription(
+                    `功能: 顯示標籤列表
+                    若未設定options則顯示所有標籤, 若設定options則顯示符合options的標籤, 依照使用次數排序
+                    /tag show <username> <type> <number>
+                    /tag show 等同於 /tag s `
+                );
+                embed.addFields(
+                    {name: 'username', value: '欲篩選的使用者名稱 : 非必要', inline: true},
+                    {name: 'type', value: '欲篩選的問題類型 : 非必要', inline: true},
+                    {name: 'number', value: '僅顯示前N筆標籤 : 非必要', inline: true}
+                )
             }
             else if(subcommand === 'info'){
                 embed.setTitle('Help - Tag - Info');
-                embed.setDescription('To show the detail of a tag, use the command `/tag info <tag name>`.');
+                embed.setDescription(
+                    `功能: 顯示標籤的詳細資訊, 若標籤為私人則僅能由標籤建立者查看
+                    /tag info <name>
+                    /tag info 等同於 /tag i `
+                );
+                embed.addFields(
+                    {name: 'name', value: '欲顯示的標籤名稱 : 必要', inline: true}
+                )
             }
             else if(subcommand === 'fetch'){
                 embed.setTitle('Help - Tag - Fetch');
-                embed.setDescription('To acquire the question and answer of a tag, use the command `/tag fetch <tag name>`.');
+                embed.setDescription(
+                    `功能: 顯示標籤的問題和回覆, 若標籤為私人則僅能由標籤建立者查看
+                    /tag fetch <name>
+                    /tag fetch 等同於 /tag f `
+                );
+                embed.addFields(
+                    {name: 'name', value: '欲顯示的標籤名稱 : 必要', inline: true}
+                )
+            }
+            else if(subcommand === 'edit'){
+                embed.setTitle('Help - Tag - Edit');
+                embed.setDescription(
+                    `功能: 編輯標籤內容或名稱, 若標籤為私人則僅能由標籤建立者編輯
+                    /tag edit <name> <question> <answer> <editname>
+                    /tag edit 等同於 /tag e `
+                );
+                embed.addFields(
+                    {name: 'name', value: '欲編輯的標籤名稱 : 必要', inline: true},
+                    {name: 'question', value: '欲設定的問題 : 非必要', inline: true},
+                    {name: 'answer', value: '欲設定的答案 : 非必要', inline: true},
+                    {name: 'editname', value: '欲設定的標籤名稱 : 非必要', inline: true}
+                )
             }
             else if(subcommand === 'all'){
                 embed.setTitle('Help - Tag - All');
-                embed.setDescription('To show the list of tag subcommands, use the command `/help tag`.');
+                embed.setDescription(
+                    `顯示所有標籤相關的指令
+                    /tag add : 新增一個標籤
+                    /tag fetch : 顯示標籤的問題和回覆
+                    /tag info : 顯示標籤的詳細資訊
+                    /tag remove : 移除一個標籤
+                    /tag show : 顯示標籤列表
+                    /tag edit : 編輯一個標籤`
+                );
             }
         }
         else if(subcommand === 'ask'){
