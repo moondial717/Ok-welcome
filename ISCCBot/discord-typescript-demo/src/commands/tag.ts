@@ -148,6 +148,10 @@ const addTag =
 const fetchTag =
     async (interaction: ChatInputCommandInteraction, name: string) =>
     {
+        if(!await checkPrivate(interaction, name)){
+            await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
+            return;
+        }
         // equivalent to: SELECT * FROM tags WHERE name = 'tagName' LIMIT 1;
         const tag: any = await Tags.findOne({ where: { name: name, guildId: interaction.guildId } });
 
@@ -254,7 +258,7 @@ const showTags =
 const removeTag =
     async (interaction: ChatInputCommandInteraction, name: string) =>
     {
-        if(!checkPrivate(interaction, name)){
+        if(!await checkPrivate(interaction, name)){
             await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
             return;
         }
@@ -269,7 +273,7 @@ const removeTag =
 const editTag =
     async (interaction: ChatInputCommandInteraction, name: string, question: string, answer: string, editname: string) =>
     {
-        if(!checkPrivate(interaction, name)){
+        if(!await checkPrivate(interaction, name)){
             await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
             return;
         }
@@ -307,7 +311,7 @@ const editTag =
 const infoTag =
     async (interaction: ChatInputCommandInteraction, name: string) =>
     {
-        if(!checkPrivate(interaction, name)){
+        if(!await checkPrivate(interaction, name)){
             await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
             return;
         }
@@ -342,7 +346,10 @@ const infoTag =
 
 async function checkPrivate(interaction: ChatInputCommandInteraction, name: string){
     const private_: any = await Tags.findOne({attributes:['private','username'], where: { guildId: interaction.guildId ,name: name } });
-    if(private_ && private_.get('private') && private_.get('username') != interaction.user.username){
+    if(private_ == null){
+        return false;
+    }
+    if(private_.get('private') && private_.get('username') != interaction.user.username){
         return false;
     }
     return true;

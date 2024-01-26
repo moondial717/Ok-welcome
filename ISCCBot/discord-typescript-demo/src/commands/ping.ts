@@ -35,7 +35,7 @@ export const testSlashCommand: SlashCommand = {
       const message = await interaction.editReply(result);
       message.react('☑️');
       message.react('📌');
-      message.react(':x:');
+      message.react('❌');
     
       // 檢查提問問題是否已存在
       const existingQuestion = await Questions.findOne({

@@ -1,8 +1,7 @@
-import { Client, Collection, Events, PermissionsBitField,
-  PartialMessageReaction, MessageReaction } from 'discord.js'
+import { Client, Collection, Events, PermissionsBitField } from 'discord.js'
 import { SlashCommand,SlashSubCommand } from './types/command'
 import { Tags } from './commands/tag'
-import { uploadFileToGCS } from './commands/uploadfile'
+import { detecturlfile } from './commands/uploadfile'
 
 export function setBotListener(client: Client, commandList: Array<SlashCommand|SlashSubCommand>) {
   const commands = new Collection<string, SlashCommand|SlashSubCommand>(commandList.map((c) => [c.data.name, c]))
@@ -17,7 +16,6 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
     if (!interaction.isChatInputCommand()) return
 
     const command = commands.get(interaction.commandName)
-
     if (!command) return
 
     try {
@@ -47,14 +45,15 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
 
     if (!reaction.message?.author || !reaction.message?.guild) return;
 
-    if(reaction.emoji.name === '📌'){
+    const member = await reaction.message.guild.members.fetch(user.id);
+    if(reaction.emoji.name === '📌' && member.permissions.has(PermissionsBitField.Flags.Administrator)){
       detecturlfile(reaction);
     }
     
 
     if (!reaction.message?.content) return;
     if (reaction.emoji.name === '☑️') {
-      const member = await reaction.message.guild.members.fetch(user.id);
+      
       if (member.permissions.has(PermissionsBitField.Flags.Administrator)) {
         let lines = reaction.message.content.split('\n');
         let firstLine = lines[0];
@@ -68,27 +67,4 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
       }
     }
   })
-}
-
-async function detecturlfile(reaction: MessageReaction | PartialMessageReaction) {
-  if (reaction.message.attachments.size > 0) {
-    reaction.message.attachments.forEach(attachment => {
-        // 檢查附件是否有 URL 和名稱
-        if (attachment.url && attachment.name) {
-            // 下載檔案並上傳到 Google Cloud Storage
-            uploadFileToGCS(attachment.url, attachment.name);
-        }
-    });
-  }
-  else {
-    const idMatch = reaction.message.content?.match(/\/d\/(.+?)\//);
-    reaction.message.embeds.forEach(embed => {
-      const fileName = embed.title;
-      if (idMatch && idMatch[1] && fileName) {
-        const fileId = idMatch[1];
-        const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
-        uploadFileToGCS(url, fileName);
-      }
-    })
-  }
 }
