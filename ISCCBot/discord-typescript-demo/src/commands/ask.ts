@@ -25,24 +25,7 @@ export const askSlashCommand: SlashCommand = {
       let result = await pythonProcessQuestion(prompt);
 
       // 擷取最後一行的來源文件
-      const lines = result.split('\n');
-      let lastline = lines[lines.length - 1];
-      
-      const filename  = lastline.replace(/來源文件: https:\/\/storage\.cloud\.google\.com\/careerhack-bucket\/(.*)/g, '$1');
-      let embed: EmbedBuilder;
-      
-      if(!lastline.includes('來源文件: https://storage.cloud.google.com/careerhack-bucket/')){
-        embed = new EmbedBuilder()
-          .setColor('#9cd6b7')
-          .setTitle(`來源文件`)
-          .setDescription('無');
-      }else{
-        lastline = lastline.replace(/來源文件: (.*)/g, `[${filename}]($1)`);
-        embed = new EmbedBuilder()
-          .setColor('#9cd6b7')
-          .setTitle(`來源文件`)
-          .setDescription(lastline);
-      }
+      const embed = await catchurl(result);
 
       // 最後更新先前的 "deferred" 訊息
       const message = await interaction.editReply({content: result, embeds: [embed]});
@@ -70,6 +53,29 @@ export const askSlashCommand: SlashCommand = {
       }
   }
 };
+
+
+export async function catchurl(result: string) {
+  const lines = result.split('\n');
+  let lastline = lines[lines.length - 1];
+  
+  const filename  = lastline.replace(/來源文件: https:\/\/storage\.cloud\.google\.com\/careerhack-bucket\/(.*)/g, '$1');
+  let embed: EmbedBuilder;
+  
+  if(!lastline.includes('來源文件: https://storage.cloud.google.com/careerhack-bucket/')){
+    embed = new EmbedBuilder()
+      .setColor('#9cd6b7')
+      .setTitle(`來源文件`)
+      .setDescription('無');
+  }else{
+    lastline = lastline.replace(/來源文件: (.*)/g, `[${filename}]($1)`);
+    embed = new EmbedBuilder()
+      .setColor('#9cd6b7')
+      .setTitle(`來源文件`)
+      .setDescription(lastline);
+  }
+  return embed;
+}
 
 export function pythonProcessQuestion(prompt: string) {
   return new Promise<string>((resolve, reject) => {

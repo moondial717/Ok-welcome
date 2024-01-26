@@ -2,7 +2,7 @@ import { Client, Collection, Events, PermissionsBitField } from 'discord.js'
 import { SlashCommand,SlashSubCommand } from './types/command'
 import { Tags } from './commands/tag'
 import { detecturlfile } from './commands/uploadfile'
-import { pythonProcessQuestion } from './commands/ask'
+import { pythonProcessQuestion, catchurl } from './commands/ask'
 
 export function setBotListener(client: Client, commandList: Array<SlashCommand|SlashSubCommand>) {
   const commands = new Collection<string, SlashCommand|SlashSubCommand>(commandList.map((c) => [c.data.name, c]))
@@ -61,11 +61,13 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
       let lines = reaction.message.content.split('\n');
       let firstLine = lines[0];
       if (!firstLine.startsWith('你的問題是:')) return;
-
+      
+      reaction.message.edit('處理中...');
       let question = firstLine.slice(7, firstLine.length);
       let result = await pythonProcessQuestion(question);
-      reaction.message.edit(result);
-
+      const embed = await catchurl(result);
+      reaction.users.remove(user.id);
+      reaction.message.edit({content: result, embeds: [embed]});
     }
 
     if (reaction.emoji.name === '☑️') {
