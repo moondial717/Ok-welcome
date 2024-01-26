@@ -1,6 +1,6 @@
 import { Client, Collection, Events, PermissionsBitField } from 'discord.js'
 import { SlashCommand,SlashSubCommand } from './types/command'
-import { Tags } from './commands/tag'
+import { Tags, Questions } from './commands/tag'
 import { detecturlfile } from './commands/uploadfile'
 import { pythonProcessQuestion, catchurl } from './commands/ask'
 
@@ -12,6 +12,35 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
     console.log('Bot Ready!')
   })
 
+  // new user
+  client.on(Events.GuildMemberAdd, async (member) => {
+    console.log('new person');
+    const welcomeChannel = member.guild.systemChannel; // 或者你可以使用其他频道
+    if (welcomeChannel) {
+      try {
+        await welcomeChannel.send(`歡迎 ${member.user.username} 加入本伺服器！請查閱基本指引。`);
+      } catch (error) {
+        console.error('Error sending welcome message:', error);
+      }
+    }
+  })
+
+  // depart
+  client.on(Events.GuildMemberRemove, async (member) => {
+    try {
+      console.log('remove');
+      console.log(member.user.username);
+      // Delete user's data from the Questions table when they leave the guild
+      await Questions.destroy({
+        where: {
+          username: member.user.username,
+        },
+      });
+      console.log(`Deleted data for user ${member.user.username} on guild ${member.guild.id}`);
+    } catch (error) {
+      console.error('Error deleting user data:', error);
+    }
+  });
 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return
@@ -43,6 +72,20 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
     if (user.bot) return;
 
     if(reaction.emoji.name === '❌'){
+      if (reaction.message.content) {
+        const content = reaction.message.content.split('\n');
+        const getquestion = content[0];
+        const colonIndex = getquestion.indexOf(":") + 1;
+        const question = getquestion.slice(colonIndex).trim();
+      
+        await Questions.destroy({
+          where: {
+            username: user.username,
+            question: question,
+          },
+        });
+      }
+
       reaction.message.delete();
       return;
     }
