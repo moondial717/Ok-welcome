@@ -44,25 +44,11 @@ export const helpSlashCommand: SlashSubCommand = {
                     /tag add 等同於 /tag a`
                 );
                 embed.addFields(
-                    {name: 'name', value: '欲設定的標籤名稱 : 必要', inline: true}
-                )
-                embed.addFields(
-                    {name: 'question', value: '欲設定的問題 : 必要', inline: true}
-                )
-                embed.addFields(
-                    {name: 'answer', value: '欲設定的答案 : 必要', inline: true}
-                )
-                embed.addFields(
-                    {name: 'type', value: '問題的類型 : 必要', inline: true}
-                )
-                embed.addFields(
-                    {name: 'private', value:`標籤是否為私人 : 非必要
-                    若為私人則其他使用者無法使用對此標籤使用以下指令
-                    - /tag fetch
-                    - /tag info
-                    - /tag edit
-                    - /tag remove
-                    預設為公開`}
+                    {name: 'name', value: '欲設定的標籤名稱 : 必要', inline: true},
+                    {name: 'question', value: '欲設定的問題 : 必要', inline: true},
+                    {name: 'answer', value: '欲設定的答案 : 必要', inline: true},
+                    {name: 'type', value: '問題的類型 : 必要', inline: true},
+                    {name: 'private', value:`標籤是否為私人 : 非必要, 預設為公開\n若為私人則其他使用者無法使用對此標籤使用以下指令\n- /tag fetch\n- /tag info\n- /tag edit\n- /tag remove`}
                 )
             }
             else if(subcommand === 'remove'){
