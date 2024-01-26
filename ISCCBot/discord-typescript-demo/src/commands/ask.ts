@@ -33,7 +33,7 @@ export const askSlashCommand: SlashCommand = {
         message.react('☑️'),
         message.react('🔧'),
         message.react('❌')
-      ]);
+      ]);  
     
       // 檢查提問問題是否已存在
       const existingQuestion = await Questions.findOne({
@@ -56,10 +56,11 @@ export const askSlashCommand: SlashCommand = {
 
 
 export async function catchurl(result: string) {
-  const lines = result.split('\n');
+  let lines = result.split('\n');
+
+  //remove empty lines
+  lines = lines.filter(Boolean);
   let lastline = lines[lines.length - 1];
-  
-  const filename  = lastline.replace(/來源文件: https:\/\/storage\.cloud\.google\.com\/careerhack-bucket\/(.*)/g, '$1');
   let embed: EmbedBuilder;
   
   if(!lastline.includes('來源文件: https://storage.cloud.google.com/careerhack-bucket/')){
@@ -68,11 +69,18 @@ export async function catchurl(result: string) {
       .setTitle(`來源文件`)
       .setDescription('無');
   }else{
-    lastline = lastline.replace(/來源文件: (.*)/g, `[${filename}]($1)`);
+    lastline = lastline.replace('來源文件: ', '');
+    let urls = lastline.split(', ');
+    let filenames = [];
+    let urlstring = '';
+    for(let i = 0; i < urls.length; i++){
+      filenames.push(urls[i].replace(/https:\/\/storage\.cloud\.google\.com\/careerhack-bucket\/(.*)/g, '$1'));
+      urlstring += `[${filenames[i]}](${urls[i]})\n`;
+    }
     embed = new EmbedBuilder()
       .setColor('#9cd6b7')
       .setTitle(`來源文件`)
-      .setDescription(lastline);
+      .setDescription(urlstring);
   }
   return embed;
 }
