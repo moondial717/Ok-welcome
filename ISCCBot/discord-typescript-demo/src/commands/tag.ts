@@ -3,7 +3,7 @@ import { SlashSubCommand } from '../types/command'
 import { Sequelize, DataTypes } from 'sequelize'
 import { Table } from 'embed-table';
 
-const sequelize = new Sequelize('database', 'user', 'password', {
+export const sequelize = new Sequelize('database', 'user', 'password', {
     host: 'localhost',
     dialect: 'sqlite',
     logging: false,
