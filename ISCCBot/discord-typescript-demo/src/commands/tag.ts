@@ -133,7 +133,13 @@ const addTag =
                 private: private_,
                 guildId: interaction.guildId
             });
-            await Questions.update({ name: name }, { where: { question: question } });
+            const existQ = await Questions.findOne({ where: { question: question }});
+            if (existQ?.get('name') != null) {
+                const existStr = existQ.get('name');
+                await Questions.update({ name: `${existStr}, ${name}`}, { where: { question: question } });
+            } else {
+                await Questions.update({ name: tag.get('name')}, { where: { question: question } });
+            }
             await interaction.reply({content:`Tag ${tag.get('name')} added.`, ephemeral: true });
         }
         catch (e:any) {
