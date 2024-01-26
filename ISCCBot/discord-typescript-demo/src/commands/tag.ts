@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, SlashCommandSubcomman
 import { SlashSubCommand } from '../types/command'
 import { Sequelize, DataTypes } from 'sequelize'
 import { Table } from 'embed-table';
+import { catchurl } from './ask';
 
 export const sequelize = new Sequelize('database', 'user', 'password', {
     host: 'localhost',
@@ -160,7 +161,7 @@ const fetchTag =
         }
         // equivalent to: SELECT * FROM tags WHERE name = 'tagName' LIMIT 1;
         const tag: any = await Tags.findOne({ where: { name: name, guildId: interaction.guildId } });
-
+        
         if(tag.get('private') && tag.get('username') != interaction.user.username){
             await interaction.reply({content: `Could not find tag ${name} or it is private`, ephemeral: true});
             return;
@@ -169,7 +170,8 @@ const fetchTag =
         if (tag) {
             // equivalent to: UPDATE tags SET usage_count = usage_count + 1 WHERE name = 'tagName';
             tag.increment('usage_count');
-            await interaction.reply({content: `問題: ${tag.get('question').toString()}\n回答: \n${tag.get('answer').toString()}`, ephemeral: true });
+            const embed = await catchurl(tag.get('answer').toString());
+            await interaction.reply({content: `問題: ${tag.get('question').toString()}\n回答: \n${tag.get('answer').toString()}`, embeds:[embed], ephemeral: true });
         }
         else {
             await interaction.reply({content:`Could not find tag: ${name}`, ephemeral: true});
