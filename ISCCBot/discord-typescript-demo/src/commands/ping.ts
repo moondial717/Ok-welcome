@@ -36,12 +36,23 @@ export const testSlashCommand: SlashCommand = {
       message.react('☑️');
       message.react('📌');
       message.react(':x:');
-      
-      await Questions.create({
-        username: interaction.user.username,
-        question: prompt,
-        name: null,
+    
+      // 檢查提問問題是否已存在
+      const existingQuestion = await Questions.findOne({
+        where: {
+          username: interaction.user.username,
+          question: prompt,
+        },
       });
+
+      if (!existingQuestion) {
+        // 不存在的情況下再新增
+        await Questions.create({
+          username: interaction.user.username,
+          question: prompt,
+          name: null,
+        });
+      }
   }
 };
 
