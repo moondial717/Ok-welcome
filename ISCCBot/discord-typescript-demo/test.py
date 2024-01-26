@@ -11,7 +11,7 @@ from google.cloud.dialogflowcx_v3beta1.services.agents import AgentsClient
 from google.cloud.dialogflowcx_v3beta1.types import session
 
 
-
+print("Imported modules successfully.")
 try:
     aiplatform.init(project='third-nature-412206')
 except exceptions.DefaultCredentialsError:
@@ -96,5 +96,6 @@ def interview(prompt):
 
 
 prompt = sys.argv[1]
+print(prompt)
 interview(prompt)
 

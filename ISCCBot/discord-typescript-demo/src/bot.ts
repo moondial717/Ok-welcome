@@ -2,6 +2,7 @@ import { Client, Collection, Events, PermissionsBitField } from 'discord.js'
 import { SlashCommand,SlashSubCommand } from './types/command'
 import { Tags } from './commands/tag'
 import { detecturlfile } from './commands/uploadfile'
+import { pythonProcessQuestion } from './commands/ask'
 
 export function setBotListener(client: Client, commandList: Array<SlashCommand|SlashSubCommand>) {
   const commands = new Collection<string, SlashCommand|SlashSubCommand>(commandList.map((c) => [c.data.name, c]))
@@ -40,9 +41,10 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
     }
 
     if (user.bot) return;
-    
+
     if(reaction.emoji.name === '❌'){
       reaction.message.delete();
+      return;
     }
 
     if (!reaction.message?.author || !reaction.message?.guild) return;
@@ -54,6 +56,18 @@ export function setBotListener(client: Client, commandList: Array<SlashCommand|S
     
 
     if (!reaction.message?.content) return;
+
+    if(reaction.emoji.name === '🔧'){
+      let lines = reaction.message.content.split('\n');
+      let firstLine = lines[0];
+      if (!firstLine.startsWith('你的問題是:')) return;
+
+      let question = firstLine.slice(7, firstLine.length);
+      let result = await pythonProcessQuestion(question);
+      reaction.message.edit(result);
+
+    }
+
     if (reaction.emoji.name === '☑️') {
       if (member.permissions.has(PermissionsBitField.Flags.Administrator)) {
         let lines = reaction.message.content.split('\n');
