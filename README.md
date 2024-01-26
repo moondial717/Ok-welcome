@@ -57,12 +57,12 @@
 
 
 #### 顯示問題列表：`\tag show`或`\tag s`
-* ![截圖 2024-01-26 下午9.42.09](https://hackmd.io/_uploads/ByJT84ZcT.png)
+![截圖 2024-01-26 下午9.42.09](https://hackmd.io/_uploads/ByJT84ZcT.png)
 * 可選擇要顯示的`number`, `username`和`type`
-* ![截圖 2024-01-26 下午10.11.27](https://hackmd.io/_uploads/ByOCpV-qp.png)
+![截圖 2024-01-26 下午10.11.27](https://hackmd.io/_uploads/ByOCpV-qp.png)
 
 #### 取得問題：`\tag fetch`或`\tag f`
-* ![截圖 2024-01-26 下午9.10.46](https://hackmd.io/_uploads/ryteLVbca.png)
+![截圖 2024-01-26 下午9.10.46](https://hackmd.io/_uploads/ryteLVbca.png)
 ![截圖 2024-01-26 下午9.13.33](https://hackmd.io/_uploads/BJf7LVb96.png)
 * 使用方式及結果
 ![截圖 2024-01-26 下午9.47.36](https://hackmd.io/_uploads/HJG7O4Zqp.png)
@@ -70,30 +70,31 @@
     ![截圖 2024-01-26 下午9.48.44](https://hackmd.io/_uploads/BypSOEW5a.png)
 
 #### 編輯問題標籤：`\tag edit`或`\tag e`
-* ![截圖 2024-01-26 下午9.13.13](https://hackmd.io/_uploads/S1dMUEb5a.png)
+![截圖 2024-01-26 下午9.13.13](https://hackmd.io/_uploads/S1dMUEb5a.png)
 ![截圖 2024-01-26 下午9.11.56](https://hackmd.io/_uploads/H1Zz8VW5p.png)
 * 使用方式及結果
-* ![截圖 2024-01-26 下午9.50.42](https://hackmd.io/_uploads/Hyvp_E-5p.png)
+  ![截圖 2024-01-26 下午9.50.42](https://hackmd.io/_uploads/Hyvp_E-5p.png)
     * 有三個選項可進行編輯（`question`, `answer`, `editname`），以下用`answer`為例
-    * ![截圖 2024-01-26 下午9.54.03](https://hackmd.io/_uploads/HytKY4b9a.png)
+      ![截圖 2024-01-26 下午9.54.03](https://hackmd.io/_uploads/HytKY4b9a.png)
     * 使用`/tag fetch`取得tag內容，answer已被改成123:）
-    * ![截圖 2024-01-26 下午9.55.15](https://hackmd.io/_uploads/SyWAt4Z9T.png)
+      ![截圖 2024-01-26 下午9.55.15](https://hackmd.io/_uploads/SyWAt4Z9T.png)
     * ⚠️：`/tag fetch`無法取得private tag
-![截圖 2024-01-26 下午10.22.40](https://hackmd.io/_uploads/HyyBgH-cT.png)
+      ![截圖 2024-01-26 下午10.22.40](https://hackmd.io/_uploads/HyyBgH-cT.png)
 
 
 #### 取得問題標籤資訊：`\tag info`或`\tag i`
-* ![截圖 2024-01-26 下午9.13.55](https://hackmd.io/_uploads/Hk548VWqT.png)
+![截圖 2024-01-26 下午9.13.55](https://hackmd.io/_uploads/Hk548VWqT.png)
 ![截圖 2024-01-26 下午9.11.02](https://hackmd.io/_uploads/HkVbINb5T.png)
 * 可顯示tag的相關資訊
-* ![截圖 2024-01-26 下午10.04.25](https://hackmd.io/_uploads/SkkWhV-56.png)
+  ![截圖 2024-01-26 下午10.04.25](https://hackmd.io/_uploads/SkkWhV-56.png)
 
 
 #### 移除問題標籤：`\tag remove`或`\tag r`
-* ![截圖 2024-01-26 下午9.40.39](https://hackmd.io/_uploads/S10tUEZqa.png)![截圖 2024-01-26 下午9.40.32](https://hackmd.io/_uploads/Hyq5UN-qa.png)
+![截圖 2024-01-26 下午9.40.39](https://hackmd.io/_uploads/S10tUEZqa.png)
+![截圖 2024-01-26 下午9.40.32](https://hackmd.io/_uploads/Hyq5UN-qa.png)
 * 使用方式及結果
-* ![截圖 2024-01-26 下午10.26.07](https://hackmd.io/_uploads/SyrSZrZ5p.png)
-* ![截圖 2024-01-26 下午10.26.57](https://hackmd.io/_uploads/SJ5r-H-cp.png)
+  ![截圖 2024-01-26 下午10.26.07](https://hackmd.io/_uploads/SyrSZrZ5p.png)
+  ![截圖 2024-01-26 下午10.26.57](https://hackmd.io/_uploads/SJ5r-H-cp.png)
 
 ### `/help` - **Introduce functions 功能介紹**
 * Chatbot function 使用介紹
