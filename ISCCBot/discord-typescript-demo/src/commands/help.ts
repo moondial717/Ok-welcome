@@ -29,6 +29,9 @@ export const helpSlashCommand: SlashSubCommand = {
         )
     )
     .addSubcommand(subcommand =>
+        subcommand.setName('info').setDescription('Check more information on the website.')
+    )
+    .addSubcommand(subcommand =>
         subcommand.setName('ask').setDescription('How to ask a question.')
     )
     .addSubcommand(subcommand =>
@@ -128,6 +131,11 @@ export const helpSlashCommand: SlashSubCommand = {
                     /tag edit : 編輯一個標籤`
                 );
             }
+        }
+        else if(subcommand === 'info'){
+            embed.setTitle('Help - Info');
+            embed.setDescription('你可以在網站上查看更多資訊:\nhttps://hackmd.io/aTB4xv92TiqJE58ca1xjpw');
+
         }
         else if(subcommand === 'ask'){
             embed.setTitle('Help - Ask');
