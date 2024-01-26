@@ -45,11 +45,37 @@ def detect_intent_texts(agent, session_id, texts, language_code):
         response = session_client.detect_intent(request=request)
 
         print("=" * 20)
-        print(f"Query text: {response.query_result.text}")
+        print(f"你的問題是: {response.query_result.text}")
         response_messages = [
             " ".join(msg.text.text) for msg in response.query_result.response_messages
         ]
-        print(f"{' '.join(response_messages)}")
+        print(f"\n{' '.join(response_messages)}")
+    
+        action_link = None
+        
+        for message in response.query_result.response_messages:
+            if message.payload:  # Check if payload exists
+                payload_fields = dict(message.payload)  # Convert MapComposite to dict
+                if "richContent" in payload_fields:
+                    rich_contents = payload_fields["richContent"]
+                    for content in rich_contents:
+                        for item in content:
+                            item_fields = dict(item)
+                            if "citations" in item_fields:
+                                citations = item_fields["citations"]
+                                for citation in citations:
+                                    citation_fields = dict(citation)
+                                    if "actionLink" in citation_fields:
+                                        action_link = citation_fields["actionLink"]
+                                        break
+                            if action_link:
+                                break
+                        if action_link:
+                            break
+                if action_link:
+                    break
+
+        print(f"來源文件: {action_link}")
     return f"{' '.join(response_messages)}"
 
 def interview(prompt):
@@ -58,13 +84,13 @@ def interview(prompt):
     # For more information about regionalization see https://cloud.google.com/dialogflow/cx/docs/how/region
     location_id = 'global'
     # For more info on agents see https://cloud.google.com/dialogflow/cx/docs/concept/agent
-    agent_id = '79d2eec3-3c1f-4fbe-ae1d-178dc63d9710'
-    agent = 'projects/third-nature-412206/locations/global/agents/79d2eec3-3c1f-4fbe-ae1d-178dc63d9710'
+    agent_id = 'eafba06e-a4cb-4a5b-be77-0f74048d876b'
+    agent = 'projects/third-nature-412206/locations/global/agents/eafba06e-a4cb-4a5b-be77-0f74048d876b'
     # For more information on sessions see https://cloud.google.com/dialogflow/cx/docs/concept/session
     session_id = uuid.uuid4()
     
     # For more supported languages see https://cloud.google.com/dialogflow/es/docs/reference/language
-    language_code = "en"
+    language_code ="zh-tw, en"
     texts = [prompt]
     response = detect_intent_texts(agent, session_id, texts, language_code)
     return response
@@ -73,24 +99,3 @@ def interview(prompt):
 prompt = sys.argv[1]
 interview(prompt)
 
-'''def interview(prompt):
-    """Ideation example with a Large Language Model"""
-    # TODO developer - override these parameters as needed:
-    parameters = {
-    "temperature": 0.2,
-    "max_output_tokens": 256,
-    "top_p": .8,
-    "top_k": 40,
-    }
-    model = TextGenerationModel.from_pretrained("text-bison@001")
-    response = model.predict(
-    prompt,
-    **parameters,
-    )
-    #result = f"{response.text}\nTokens used: {response.grounding_metadata}"
-    result = f"{response.text}"
-    return result
-prompt = "請使用繁體中文回答：\n"
-prompt += sys.argv[1]
-print(f"你的問題是: {sys.argv[1]}")
-print(interview(prompt))'''
