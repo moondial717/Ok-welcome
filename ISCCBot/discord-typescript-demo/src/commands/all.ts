@@ -51,8 +51,9 @@ export const AllQuestionsSlashCommand: SlashCommand = {
           .setColor('#9cd6b7')
           .setTitle(`User questions:`);
 
-          const userQuestionsMap: { [username: string]: { index: number, questions: string[], tags: string[] } } = {};
-
+          
+          const userQuestionsMap: { [username: string]: { index: number, data: { question: string; tag: string }[] } } = {};
+          
           userQuestions.forEach((q: any) => {
             const username = q.get('username');
             const index = (userQuestionsMap[username]?.index || 0) + 1;
@@ -60,23 +61,22 @@ export const AllQuestionsSlashCommand: SlashCommand = {
             const tagText = q.get('name') ? ` (Tag: ${q.get('name')})` : ''; // Check if tagname exists
     
             if (!userQuestionsMap[username]) {
-              userQuestionsMap[username] = { index, questions: [], tags: [] };
+              userQuestionsMap[username] = { index, data: [] };
             }
-    
-            userQuestionsMap[username].questions.push(questionText);
-            userQuestionsMap[username].tags.push(tagText);
+
+            userQuestionsMap[username].data.push({ question: questionText, tag: tagText });
           });
     
+          
           Object.keys(userQuestionsMap).forEach((username) => {
-            const { questions, tags } = userQuestionsMap[username];
-            const questionText = questions.join('\n');
-            const tagText = tags.filter(Boolean).join('\n');
+            const { data } = userQuestionsMap[username];
+            const questionAndTagText = data.map(item => `${item.question}${item.tag}`).join('\n');
             embed.addFields({
               name: `${username}:`,
-              value: `${questionText}${tagText}`,
+              value: questionAndTagText,
             });
           });
-
+          
           // Send the embed as a reply
           await interaction.reply({ embeds: [embed] });
         } catch (error) {
