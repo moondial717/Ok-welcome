@@ -44,7 +44,6 @@ def detect_intent_texts(agent, session_id, texts, language_code):
         )
         response = session_client.detect_intent(request=request)
 
-        print("=" * 20)
         print(f"你的問題是: {response.query_result.text}")
         response_messages = [
             " ".join(msg.text.text) for msg in response.query_result.response_messages
