@@ -6,13 +6,14 @@ import { setBotListener } from './bot'
 import { askSlashCommand } from './commands/ask'
 import { AllQuestionsSlashCommand } from './commands/all'
 import { TagSlashCommand} from './commands/tag'
+import { helpSlashCommand } from './commands/help'
 import { deploySlashCommands } from './deploy'
 import { SlashCommand,SlashSubCommand } from './types/command'
 import { AppConfig } from './types/config'
 
 // Register commands
 const commandList: Array<SlashCommand> = [askSlashCommand, AllQuestionsSlashCommand]
-const subcommandList: Array<SlashSubCommand> = [TagSlashCommand]
+const subcommandList: Array<SlashSubCommand> = [TagSlashCommand, helpSlashCommand]
 
 // Combine commandList and subcommandList
 const combinedList = [...commandList, ...subcommandList];
